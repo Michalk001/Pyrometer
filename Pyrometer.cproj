@@ -157,15 +157,6 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="spi.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="spi.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="spi_config.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="i2cmaster.c">
       <SubType>compile</SubType>
     </Compile>

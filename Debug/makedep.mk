@@ -6,7 +6,5 @@ HD44780.c
 
 main.c
 
-spi.c
-
 i2cmaster.c
 

@@ -40,7 +40,6 @@ SUBDIRS :=  \
 C_SRCS +=  \
 ../HD44780.c \
 ../main.c \
-../spi.c \
 ../i2cmaster.c
 
 
@@ -53,25 +52,21 @@ ASM_SRCS +=
 OBJS +=  \
 HD44780.o \
 main.o \
-spi.o \
 i2cmaster.o
 
 OBJS_AS_ARGS +=  \
 HD44780.o \
 main.o \
-spi.o \
 i2cmaster.o
 
 C_DEPS +=  \
 HD44780.d \
 main.d \
-spi.d \
 i2cmaster.d
 
 C_DEPS_AS_ARGS +=  \
 HD44780.d \
 main.d \
-spi.d \
 i2cmaster.d
 
 OUTPUT_FILE_PATH +=Pyrometer.elf
@@ -96,13 +91,6 @@ LINKER_SCRIPT_DEP+=
 	
 
 ./main.o: .././main.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)G:\ATMEL_STUDIO\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"G:\ATMEL_STUDIO\7.0\Packs\atmel\ATmega_DFP\1.3.300\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "G:\ATMEL_STUDIO\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./spi.o: .././spi.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)G:\ATMEL_STUDIO\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"G:\ATMEL_STUDIO\7.0\Packs\atmel\ATmega_DFP\1.3.300\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "G:\ATMEL_STUDIO\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
