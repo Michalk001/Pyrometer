@@ -21,13 +21,17 @@
 #include "i2cmaster.h"
 
 
-char min[7];
-char max[7];
-char average[7];
+typedef struct Data{
+	char min[8];
+	char max[8];
+	char average[8];
+	} Data;
 
 
-void convertDoubleToCharDisplay(double temperature, char *display){
-	char displayStr[7] = "1234567"; 
+
+void convertDoubleToCharDisplay(double temperature,char display[7]){
+	
+	char displayStr[7] = "XXXXXXX";
 	int total = temperature;
 	int mantis = abs(temperature * 1000);
 	mantis = mantis % 1000;
@@ -47,60 +51,65 @@ void convertDoubleToCharDisplay(double temperature, char *display){
 		displayStr[0]= '-';
 		
 		
-	}else if(abs(total) >= 10){
+		}else if(abs(total) >= 10){
 		displayStr[0] = ' ';
 		displayStr[2]=totalStr[0];
 		displayStr[3]=totalStr[1];
 		if(abs(total) < 0)
-			displayStr[1]= '-';
-	}else{
+		displayStr[1]= '-';
+		}else{
 		displayStr[0] = ' ';
 		displayStr[0] = ' ';
 		displayStr[3]=totalStr[0];
 		if(abs(total) < 0)
-			displayStr[2]= '-';
+		displayStr[2]= '-';
 	}
-		
+	
 	displayStr[4]= '.';
 	displayStr[5]= mantisStr[0];
 	displayStr[6]= mantisStr[1];
 	
+
 	strcpy(display,displayStr);
-	return;
 }
 
 
-void displayTemperature(short int *change){
-	//++(*change);
-
+void displayTemperature(double temperature,short int *change, char average[7], char min[7],char max[7]){
+//	++(*change);
 	
-
-/*	
-	if((*change) < 25)
+	
+/*	if((*change) < 25)
 	{
 		LCD_GoTo(0,0);
 		LCD_WriteText("MIN:");
 		LCD_GoTo(4,0);
-		LCD_WriteText(displayMIN);
+		LCD_WriteText(displayStr2);
 	}
 	else{
 		LCD_GoTo(0,0);
 		LCD_WriteText("MAX:");
 		LCD_GoTo(4,0);
-		LCD_WriteText(displayMAX);
+		LCD_WriteText(displayStr2);
 	}
 	if((*change) > 50)
 		(*change) = 0;*/
+	LCD_Clear();
 	
+	/*LCD_GoTo(0,0);
+	LCD_WriteText(min);
+	LCD_GoTo(7,0);
+	LCD_WriteText("C");
+	LCD_GoTo(8,0);
+	LCD_WriteText(max);
+	LCD_GoTo(15,0);
+	LCD_WriteText("C");*/
 	LCD_GoTo(0,1);
 	LCD_WriteText("AVERAGE:");
 	LCD_GoTo(8,1);
-	LCD_WriteText("11");
+	LCD_WriteText(average);
 	LCD_GoTo(15,1);
 	LCD_WriteText("C");
 	_delay_ms(100);
-	
-		return;
 }
 
 void getData(double Temperatures[21]){
@@ -111,7 +120,7 @@ void getData(double Temperatures[21]){
 		int daneL = 0;            // Pierwszy bajt danych
 		double tempnalsb = 0.02;  // Zmienna, przez któr? wymna?ana b?dzie warto?? cyfrowa
 		double temperature = 0;   // Zmienna przechowuj?ca temperatur?
-		
+	
 	for(int index = 0; index < 21; ++index){
 		temperature = 0;
 		daneH = 0;   
@@ -131,25 +140,45 @@ void getData(double Temperatures[21]){
 		Temperatures[index] = temperature;
 		
 	}
-	LCD_Clear();
-		return;
+	
+	
 }
+int cmp(const void *x, const void *y)
+{
+	double xx = *(double*)x, yy = *(double*)y;
+	if (xx < yy) return -1;
+	if (xx > yy) return  1;
+	return 0;
+}
+		
+void dataProcesing(double Temperatures[21], char *average, char *min,char *max){
+		
+	
+		double sort[21];
+		double averageTMP = 0;
+		for(int x = 0; x < 21; ++x){
+			sort[x] = Temperatures[x];
+			averageTMP += Temperatures[x];
+		}
+		
+		
 
-void dataProcesing(double Temperatures[21]){
-	
-	
-	char displayMIN[7];
-	char displayMAX[7];
-	
-	char displayAVE[7] = "XXXXXXX";
-	convertDoubleToCharDisplay(23.54,displayAVE);
-	/*convertDoubleToCharDisplay(temperature,displayMIN);
-	convertDoubleToCharDisplay(temperature,displayMAX);*/
-	//for(int index = 0; index < 7;++index){
-		strcpy(average , displayAVE);
+		averageTMP = averageTMP/20;
+		
+		for(int x = 0; x < 21; ++x)
+			for(int y = 0; y < 20; ++y){
+				if(Temperatures[y] > Temperatures[y+1]){
+					double tmp = Temperatures[y];
+					Temperatures[y] = Temperatures[y + 1];
+					Temperatures[y + 1]  = tmp;
+				}
+		}
 
-	//}
-		return;
+	
+		convertDoubleToCharDisplay(averageTMP,average);
+		convertDoubleToCharDisplay(sort[0],min);
+		convertDoubleToCharDisplay(sort[20],max);
+	 
 }
 
 int main(void)
@@ -157,22 +186,25 @@ int main(void)
 		
 		LCD_Initalize();
 		LCD_WriteText("INIT");
-		_delay_ms(1000);
 		i2c_init();  
-		
+	
+		struct Data dataTemperature;
 		double Temperatures[21];
 		
 		DDRD = _BV(DDD7);
 		PORTD = _BV(PD7);		short int change = 0;
-		
-		
+		char average[7];
+		char min[7];
+		char max[7];
 	while (1)
 	{
+		
+		
 		getData(Temperatures);
-		
-		dataProcesing(Temperatures);
-		
-		displayTemperature(&change);
+		dataProcesing(Temperatures,average,min,max);
+		_delay_ms(20);
+		displayTemperature(1,&change,average,min,max);
+		_delay_ms(2000);
 
 	}
 }
