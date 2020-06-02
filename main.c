@@ -74,35 +74,9 @@ void convertDoubleToCharDisplay(double temperature,char display[7]){
 }
 
 
-void displayTemperature(double temperature,short int *change, char average[7], char min[7],char max[7]){
-//	++(*change);
-	
-	
-/*	if((*change) < 25)
-	{
-		LCD_GoTo(0,0);
-		LCD_WriteText("MIN:");
-		LCD_GoTo(4,0);
-		LCD_WriteText(displayStr2);
-	}
-	else{
-		LCD_GoTo(0,0);
-		LCD_WriteText("MAX:");
-		LCD_GoTo(4,0);
-		LCD_WriteText(displayStr2);
-	}
-	if((*change) > 50)
-		(*change) = 0;*/
+void displayTemperature(double temperature, char average[7], char min[7],char max[7]){
+
 	LCD_Clear();
-	
-	/*LCD_GoTo(0,0);
-	LCD_WriteText(min);
-	LCD_GoTo(7,0);
-	LCD_WriteText("C");
-	LCD_GoTo(8,0);
-	LCD_WriteText(max);
-	LCD_GoTo(15,0);
-	LCD_WriteText("C");*/
 	LCD_GoTo(0,1);
 	LCD_WriteText("AVERAGE:");
 	LCD_GoTo(8,1);
@@ -192,19 +166,23 @@ int main(void)
 		double Temperatures[21];
 		
 		DDRD = _BV(DDD7);
-		PORTD = _BV(PD7);		short int change = 0;
+		PORTD = _BV(PD7);
 		char average[7];
 		char min[7];
 		char max[7];
 	while (1)
 	{
 		
-		
-		getData(Temperatures);
-		dataProcesing(Temperatures,average,min,max);
-		_delay_ms(20);
-		displayTemperature(1,&change,average,min,max);
-		_delay_ms(2000);
+		if(!(PIND & _BV(PIND7)))
+		{
+			getData(Temperatures);
+			dataProcesing(Temperatures,average,min,max);
+			_delay_ms(20);
+		}
+
+	
+		displayTemperature(1,average,min,max);
+		_delay_ms(200);
 
 	}
 }
