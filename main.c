@@ -21,14 +21,6 @@
 #include "i2cmaster.h"
 
 
-typedef struct Data{
-	char min[8];
-	char max[8];
-	char average[8];
-	} Data;
-
-
-
 void convertDoubleToCharDisplay(double temperature,char display[7]){
 	
 	char displayStr[7] = "XXXXXXX";
@@ -74,13 +66,13 @@ void convertDoubleToCharDisplay(double temperature,char display[7]){
 }
 
 
-void displayTemperature(double temperature, char average[7]){
+void displayTemperature(char averageStr[7]){
 
 	LCD_Clear();
 	LCD_GoTo(0,1);
 	LCD_WriteText("AVERAGE:");
 	LCD_GoTo(8,1);
-	LCD_WriteText(average);
+	LCD_WriteText(averageStr);
 	LCD_GoTo(15,1);
 	LCD_WriteText("C");
 	_delay_ms(100);
@@ -90,8 +82,7 @@ void displayTemperature(double temperature, char average[7]){
 
 void getData(double Temperatures[21]){
 	
-	int adress = 0xb4;         
-	int erc = 0;              
+	int adress = 0xb4;          
 	int dateH = 0;           
 	int dataL = 0;            
 	double tempnalsb = 0.02;  
@@ -106,7 +97,7 @@ void getData(double Temperatures[21]){
 		i2c_rep_start(adress+I2C_READ);
 		dataL = i2c_readAck();           
 		dateH = i2c_readAck();             
-		erc = i2c_readNak();                
+		i2c_readNak();                
 		i2c_stop();
 		
 		temperature = (double)(((dateH & 0x007F) << 8) + dataL); 
@@ -128,11 +119,8 @@ double approximation(double temp){
 	
 void dataProcesing(double Temperatures[21], char *average){
 		
-	
-		double sort[21];
 		double averageTMP = 0;
 		for(int x = 0; x < 21; ++x){
-			sort[x] = Temperatures[x];
 			averageTMP += Temperatures[x];
 		}
 			
@@ -149,28 +137,24 @@ int main(void)
 		LCD_Initalize();
 		LCD_WriteText("INIT");
 		i2c_init();  
-	
-		struct Data dataTemperature;
+
 		double Temperatures[21];
 		
 		DDRD = _BV(DDD7);
 		PORTD = _BV(PD7);
 		char average[7];
-		char min[7];
-		char max[7];
-	while (1)
-	{
-		
-		if(!(PIND & _BV(PIND7)))
+		while (1)
 		{
-			getData(Temperatures);
-			dataProcesing(Temperatures,average);
-			_delay_ms(20);
+			
+			if(!(PIND & _BV(PIND7)))
+			{
+				getData(Temperatures);
+				dataProcesing(Temperatures,average);
+				_delay_ms(20);
+			}
+
+			displayTemperature(average);
+			_delay_ms(200);
+
 		}
-
-	
-		displayTemperature(1,average);
-		_delay_ms(200);
-
-	}
 }
