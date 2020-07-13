@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <math.h>
 
 #include "HD44780.h"
 #include "i2cmaster.h"
@@ -104,11 +104,8 @@ void getData(double Temperatures[21]){
 		temperature = temperature*tempnalsb; 
 
 		temperature = temperature - 273.15; 
-		Temperatures[index] = temperature;
-		
+		Temperatures[index] = temperature;	
 	}
-	
-	
 }
 
 
@@ -116,6 +113,24 @@ double approximation(double temp){
 
 	return temp - (0.0038*temp*temp + -0.3371 * temp + 7.7529);
 }
+	
+		
+double approximation2(double temp){
+
+	return 5.952*0.00001 * temp * temp	+1.027*temp - 1.634;
+
+	
+}
+double approximation3(double temp){
+
+	return -0.003561*temp * temp * temp+0.4113*temp * temp - 14.77*temp + 200.3;
+}
+
+double approximation4(double temp){
+
+	return 13.35*exp(0.02713*temp);
+
+}	
 	
 void dataProcesing(double Temperatures[21], char *average){
 		
@@ -131,6 +146,51 @@ void dataProcesing(double Temperatures[21], char *average){
 	 
 }
 
+
+void dataProcesing2(double Temperatures[21], char *average){
+	
+	double averageTMP = 0;
+	for(int x = 0; x < 21; ++x){
+		averageTMP += Temperatures[x];
+	}
+	
+	averageTMP = averageTMP/20;
+	if(averageTMP > 38.5)
+		averageTMP = approximation2b(averageTMP);
+		else
+		averageTMP = approximation2a(averageTMP);
+	convertDoubleToCharDisplay(averageTMP,average);
+
+	
+}
+
+void dataProcesing3(double Temperatures[21], char *average){
+	
+	double averageTMP = 0;
+	for(int x = 0; x < 21; ++x){
+		averageTMP += Temperatures[x];
+	}
+	
+	averageTMP = averageTMP/20;
+	averageTMP = approximation3(averageTMP);
+	convertDoubleToCharDisplay(averageTMP,average);
+
+}
+
+void dataProcesing4(double Temperatures[21], char *average){
+	
+	double averageTMP = 0;
+	for(int x = 0; x < 21; ++x){
+		averageTMP += Temperatures[x];
+	}
+	
+	averageTMP = averageTMP/20;
+	averageTMP = approximation4(averageTMP);
+	convertDoubleToCharDisplay(averageTMP,average);
+
+	
+}
+
 int main(void)
 {
 		
@@ -143,6 +203,9 @@ int main(void)
 		DDRD = _BV(DDD7);
 		PORTD = _BV(PD7);
 		char average[7];
+		char average2[7];
+		char average3[7];
+		char average4[7];
 		while (1)
 		{
 			
@@ -150,10 +213,24 @@ int main(void)
 			{
 				getData(Temperatures);
 				dataProcesing(Temperatures,average);
+				dataProcesing2(Temperatures,average2);
+				dataProcesing3(Temperatures,average3);
+				dataProcesing4(Temperatures,average4);
 				_delay_ms(20);
 			}
 
-			displayTemperature(average);
+		LCD_Clear();
+		LCD_GoTo(0,0);
+		LCD_WriteText(average);
+		LCD_GoTo(9,0);
+		LCD_WriteText(average2);
+		LCD_GoTo(0,1);
+		LCD_WriteText(average3);
+		LCD_GoTo(9,1);
+		LCD_WriteText(average4);
+		_delay_ms(100);
+
+		//	displayTemperature(average);
 			_delay_ms(200);
 
 		}
